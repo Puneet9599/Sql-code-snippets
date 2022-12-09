@@ -1,0 +1,339 @@
+
+use library;
+
+-- Alter queries (Add column, change datatype, remove column)
+
+select * from students
+
+Alter table Students
+add bookAuth varchar(20)
+
+Alter table students
+drop column bookAuth
+
+select name, studid from students
+
+select * from book
+
+Alter table book
+alter column dt_issue datetime
+
+
+
+use module3;
+
+/*Create temporary table */
+
+create table #dept (id int, name char(10))
+
+select * from #dept;
+
+
+/*Aggregate functions*/
+
+
+insert into employee values (null,null,null,null,null,null);
+
+select * from employee;
+
+select avg(e_salary) avg_e_slary,avg(e_age) as age from employee;
+
+select avg(e_age) from employee;
+
+select avg(e_salary)salary,e_dept from employee group by e_dept;
+
+select avg(e_salary)salary,e_gender from employee group by e_gender;
+
+select count(*) from employee;
+select count(e_age) from employee;
+
+select max(e_salary) from employee;
+
+select * from employee;
+select max(e_salary),e_dept from employee group by e_dept
+
+
+select * from employee;
+select min(e_salary) from employee;
+select min(e_salary) as minsalary,e_gender from employee group by e_gender 
+
+select sum(e_salary) from employee
+select sum(e_salary),e_gender from employee group by e_gender
+
+select min(e_salary),max(e_salary),count(*),e_name from employee group by e_name
+
+select e_name from employee where e_salary = 
+(select min(e_salary) from employee )
+
+
+/*Check sum detect changes in the table*/
+select * from employee;
+select checksum_agg(e_id),e_dept from employee group by e_dept
+
+
+update employee set e_dept = 'Support' where e_name = 'Anne'
+
+update employee set e_dept = 'Analytics' where e_name = 'Anne'
+
+
+select count_big(e_id) from employee
+
+update employee set e_id = '5' where e_id is null
+
+update employee set e_id = null where e_id = 2
+
+
+select stdev(e_id) from employee
+
+select var(e_id) from employee
+
+
+/* SQL Date functions */
+select CURRENT_TIMESTAMP
+select getdate()
+
+select DATEDIFF(day,'2018-01-01','2019-01-01')
+
+select datepart(month,'2022-04-02')
+
+
+/* String Functions */
+
+select ('   JOHN')
+
+select LTRIM('   JOHN')
+
+select lower('JOHN')
+
+select upper('john')
+
+select upper(e_name) from employee;
+
+select reverse('dave')
+
+select substring('david',1,3)
+select substring('david',4,5)
+
+select TRY_CAST(1.7 AS int)
+
+/*RANK, DENSERANK, ROW NUMBER */
+drop table emp
+create table emp (e_id int,empName varchar(20),empSal bigint)
+
+select * from emp
+
+insert into emp values('4','Sam','2000')
+insert into emp values('5','Dave','2000')
+insert into emp values('6','John','3000')
+insert into emp values('7','Richard','4000')
+insert into emp values('1','Derik','1000')
+insert into emp values('2','Sara','1000')
+insert into emp values('3','Ronnie','1000')
+insert into emp values('9','Robin','4000')
+insert into emp values('10','Alle','6000')
+insert into emp values('8','Mary','4000')
+insert into emp values('10','Alle','6000')
+
+select * from emp order by e_id
+select empName,empSal, rank() over (order by empSal) as rnk from emp 
+
+select empName,empSal, dense_rank() over (order by  empSal ) as d_rnk from emp 
+
+select empName,empSal, row_number() over (order by empSal) as rn from emp 
+
+with employeee as
+(select e_id,empName,row_number() over (order by empSal)rn from emp)
+delete from employeee where rn=11
+
+CTE - common table expressions
+
+
+/*CASE*/
+
+select * from employee;
+
+select *,
+case 
+when e_id = 1 then '123'
+when e_id = 2 then '2345'
+else e_id end as e_id ,
+case 
+when e_name = 'Julia' then 'Ryan' 
+else e_name end as e_name 
+from employee
+
+
+select e_dept,
+case 
+when e_dept = 'Analytics' then '****'
+else e_name end as e_name 
+from employee
+
+
+
+/*IFF*/
+select iif(50>100,'YES','NO')
+
+with emppp as
+(select *,
+iif(e_name = 'Julia','YES','NO') as e_name_flag,
+iif(e_age = 30,'employee found','not found') as em from employee
+)
+
+select * from emppp where e_name_flag = 'NO'
+
+
+select * from employee where e_age = 30 and e_salary = 5000
+
+
+select * from employee
+
+
+/*scalar valued function*/
+
+drop function yearlysale
+
+CREATE FUNCTION yearlysale(
+    @quantity INT,
+    @price DEC(10,2)
+)
+RETURNS DEC(10,2)
+AS 
+BEGIN
+    RETURN @quantity * @price;
+END;
+
+select dbo.yearlysale(150,180.58) as netsale
+
+
+/*Create dataset to perform table valued function here*/
+
+create table orders(order_id int, item_name varchar(20),quantity int, price float)
+
+insert into orders values(101,'Electric Oven',300,5000)
+insert into orders values(102,'Hair dryer',100,250)
+insert into orders values(103,'Water Bottle',150,200)
+insert into orders values(104,'Wireless speaker',500,500)
+insert into orders values(105,'Stationery',700,500)
+
+select * from orders
+
+/*Table valued function*/
+
+create table orderss11(order_id int, item_name varchar(20),quantity int, price float,netsale float)
+
+insert into orderss11 
+select *,dbo.yearlysale(quantity,price) as netsale from orders 
+
+select * from orders11
+
+--    PROGRAMMING CONSTRUCTS 
+
+/*Declare variable*/
+
+declare @orderItem varchar(30), @id int
+go
+
+
+declare @orderItem varchar(30)
+select @orderItem = 'Hair dryer'
+print(@orderItem)
+go
+
+select * from orders
+
+declare @orderItem varchar(30),@orderId int
+select @orderItem = item_name  from orders where order_id = 102
+print(@orderItem)
+select @orderId = order_id  from orders where item_name = @orderItem
+print(@orderId)
+go
+
+
+/*BEGIN END*/
+BEGIN
+select 'Hanna' as EmpName
+select 'John' as EmpName
+END
+
+select * from employee
+
+/*BEGIN END with IF ELSE*/
+if (1!=2)
+begin
+	select * from employee;
+end
+else 
+begin
+	select top 1 * from employee 
+end
+
+/*EXISTS*/
+
+if exists(select * from employee where e_age=40)
+begin
+	select * from employee
+end
+else if exists(select * from employee where e_age=30)
+begin
+	select * from employee where e_age = 30
+end
+else
+begin
+	print 'NOT EXISTS'
+end
+
+/*While loop*/
+
+declare @count int
+select @count = 1
+while (@count < 5)
+begin
+	select @count = @count+1
+	print 'LOOP AGAIN!'
+end
+print 'LOOP FINISHED'
+
+
+/*BREAK*/
+
+
+declare @count int
+select @count = 1
+while (@count < 5)
+begin
+	select @count = @count+1
+	if(@count = 3)
+	begin
+		break
+	end
+	else
+	begin
+		print 'LOOP AGAIN!'
+	end
+end
+print 'LOOP FINISHED'
+
+
+/*CONTINUE*/
+
+declare @count int
+select @count = 1
+while (@count < 5)
+begin
+	select @count = @count+1
+	if(@count = 3)
+	begin
+		continue
+	end
+	else
+	begin
+		print 'LOOP AGAIN!'
+	end
+end
+print 'LOOP FINISHED'
+
+
+
+
+https://www.microsoft.com/en-in/download/details.aspx?id=13255
